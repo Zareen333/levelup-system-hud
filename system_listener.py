@@ -190,6 +190,12 @@ class VoiceListener:
         """
         clean = phrase.lower().strip()
 
+        # Command: Add Quest by Voice (e.g., "add quest run 5 kilometers", "new quest study physics")
+        if clean.startswith("add quest ") or clean.startswith("new quest ") or clean.startswith("create quest "):
+            title_text = clean.replace("add quest ", "").replace("new quest ", "").replace("create quest ", "").strip().title()
+            if title_text:
+                return ("addquest", {"title": title_text, "xp": 50, "category": "General"})
+
         # Command: Level Up
         if "level" in clean or "upgrade" in clean:
             return ("levelup", None)

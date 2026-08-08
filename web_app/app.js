@@ -225,6 +225,15 @@ class LevelUpApp {
   }
 
   parseSpokenIntent(phrase) {
+    if (phrase.includes("add quest ") || phrase.includes("new quest ") || phrase.includes("create quest ")) {
+      let title = phrase.replace("add quest ", "").replace("new quest ", "").replace("create quest ", "").trim();
+      if (title) {
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+        this.addQuest(title, 50, "General");
+        return;
+      }
+    }
+
     if (phrase.includes("level up") || phrase.includes("upgrade level")) {
       this.triggerLevelUp();
       return;
