@@ -1,0 +1,51 @@
+[
+  {
+    "id": "Q1",
+    "title": "Complete 50 Pushups",
+    "xp": 50,
+    "category": "Physical",
+    "is_completed": true
+  },
+  {
+    "id": "Q2",
+    "title": "Study Python Data Structures for 1 Hour",
+    "xp": 75,
+    "category": "Intellect",
+    "is_completed": true
+  },
+  {
+    "id": "Q3",
+    "title": "Build Module 3 of AR Project",
+    "xp": 100,
+    "category": "Coding",
+    "is_completed": true
+  },
+  {
+    "id": "Q4",
+    "title": "Run 3 Kilometers at High Pace",
+    "xp": 120,
+    "category": "Physical",
+    "is_completed": true
+  },
+  {
+    "id": "Q5",
+    "title": "Read 20 Pages of Technical Documentation",
+    "xp": 80,
+    "category": "Intellect",
+    "is_completed": true
+  },
+  {
+    "id": "Q6",
+    "title": "read a book(10 pages)",
+    "xp": 50,
+    "category": "General",
+    "is_completed": true
+  },
+  {
+    "id": "Q7",
+    "title": "10 push up",
+    "xp": 50,
+    "category": "General",
+    "is_completed": false
+  }
+]

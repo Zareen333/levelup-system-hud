@@ -1,0 +1,599 @@
+/* LevelUp — Solo Leveling AR Glassmorphic Styling System */
+
+:root {
+  --bg-dark: #1a0b2e;
+  --panel-bg: rgba(17, 6, 32, 0.85);
+  --input-bg: rgba(12, 6, 24, 0.9);
+  --cyan: #00e5ff;
+  --blue: #0055ff;
+  --light-cyan: #80f5ff;
+  --gold: #ffd700;
+  --green: #00ff9d;
+  --white: #ffffff;
+  --muted: #8c9bb4;
+  --dark-border: #281946;
+  --danger: #ff5050;
+  --font-main: 'Outfit', 'Inter', -apple-system, sans-serif;
+  --font-mono: 'Consolas', 'Fira Code', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--white);
+  font-family: var(--font-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Subtle Cyber Grid Background */
+.bg-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(35, 18, 62, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35, 18, 62, 0.5) 1px, transparent 1px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Glassmorphic Panel Core */
+.glass-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid var(--cyan);
+  border-radius: 6px;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.25), inset 0 0 12px rgba(0, 229, 255, 0.1);
+  position: relative;
+}
+
+/* Corner HUD Ticks */
+.glass-panel::before,
+.glass-panel::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--white);
+  border-style: solid;
+  pointer-events: none;
+}
+.glass-panel::before {
+  top: -2px;
+  left: -2px;
+  border-width: 2px 0 0 2px;
+}
+.glass-panel::after {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Main Container Layouts */
+.hud-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  margin: auto;
+}
+
+body.desktop-view .hud-container {
+  width: 1000px;
+  max-width: 95vw;
+}
+
+body.mobile-view .hud-container {
+  width: 440px;
+  max-width: 95vw;
+}
+
+/* Header Panel */
+.header-panel {
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--cyan);
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+}
+.hud-title .dim {
+  color: var(--muted);
+}
+
+.level-badge {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Buttons Styling */
+.btn-pill {
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--gold);
+  background: rgba(40, 20, 75, 0.8);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+.btn-pill:hover {
+  background: var(--gold);
+  color: var(--bg-dark);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.btn-add {
+  border-color: var(--green);
+  background: rgba(10, 60, 40, 0.8);
+  color: var(--green);
+}
+.btn-add:hover {
+  background: var(--green);
+  color: var(--bg-dark);
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.6);
+}
+
+.btn-mic {
+  border-color: var(--cyan);
+  background: rgba(0, 85, 255, 0.3);
+  color: var(--light-cyan);
+}
+.btn-mic.active {
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 8px rgba(0, 255, 157, 0.4);
+}
+
+/* Player Info & Stats */
+.header-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.stats-grid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--light-cyan);
+}
+
+.stat-divider {
+  color: var(--dark-border);
+}
+
+.unspent-badge {
+  color: var(--gold);
+  font-weight: 800;
+  animation: pulse-gold 1.5s infinite alternate;
+}
+
+/* XP Progress Bar */
+.xp-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.xp-bar-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.xp-bar-track {
+  width: 100%;
+  height: 18px;
+  background: rgba(15, 8, 30, 0.9);
+  border: 1px solid var(--blue);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  box-shadow: 0 0 12px var(--cyan);
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Quest Log Panel */
+.quest-panel {
+  border-color: var(--blue);
+  padding: 20px 24px;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.panel-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--cyan);
+}
+
+.panel-subtext {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+/* Quest Items */
+.quest-card {
+  background: rgba(10, 5, 25, 0.7);
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.quest-card:hover {
+  background: rgba(0, 229, 255, 0.12);
+  transform: translateX(4px);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+.quest-card.completed {
+  background: rgba(8, 12, 18, 0.4);
+  border-color: var(--dark-border);
+  cursor: default;
+}
+.quest-card.completed:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.quest-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quest-key {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.quest-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.quest-card.completed .quest-title {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.quest-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quest-cat {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--light-cyan);
+}
+
+.quest-xp {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.quest-status-done {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--green);
+}
+
+/* Console Panel */
+.console-panel {
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.console-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gold);
+  font-family: var(--font-mono);
+}
+
+.console-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.console-prompt {
+  color: var(--cyan);
+  font-weight: 800;
+}
+
+#console-input {
+  flex: 1;
+  background: var(--input-bg);
+  border: 1px solid var(--dark-border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+#console-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+.btn-send {
+  background: var(--blue);
+  border: 1px solid var(--cyan);
+  color: var(--white);
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-send:hover {
+  background: var(--cyan);
+  color: var(--bg-dark);
+}
+
+/* Modal Overlays */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  width: 480px;
+  max-width: 90vw;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--gold);
+  text-align: center;
+}
+.modal-title.green-glow {
+  color: var(--green);
+}
+
+.modal-subtext {
+  font-size: 0.85rem;
+  color: var(--white);
+  text-align: center;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-text-input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 2px solid var(--cyan);
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: var(--cyan);
+  font-family: var(--font-main);
+  font-size: 1rem;
+  font-weight: 700;
+  outline: none;
+}
+.modal-text-input:focus {
+  box-shadow: 0 0 12px var(--cyan);
+}
+
+.modal-form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 45%;
+}
+.form-group.full-width {
+  flex: 1 1 100%;
+}
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 10px;
+  font-weight: 800;
+  border-radius: 6px;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-confirm {
+  background: var(--blue);
+  border-color: var(--cyan);
+  color: var(--white);
+}
+.btn-confirm:hover {
+  background: var(--cyan);
+  color: var(--bg-dark);
+}
+
+.btn-save {
+  background: rgba(10, 80, 40, 0.9);
+  border-color: var(--green);
+  color: var(--white);
+}
+.btn-save:hover {
+  background: var(--green);
+  color: var(--bg-dark);
+}
+
+.btn-cancel {
+  background: rgba(70, 20, 30, 0.9);
+  border-color: var(--danger);
+  color: var(--white);
+}
+.btn-cancel:hover {
+  background: var(--danger);
+}
+
+/* Level Up Popup Banner */
+.levelup-card {
+  border-color: var(--gold);
+  border-width: 3px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  animation: levelup-pulse 1.2s infinite alternate;
+}
+.levelup-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+.levelup-msg {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+.levelup-sub {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--cyan);
+  margin-top: 4px;
+}
+
+/* Animations */
+@keyframes pulse-gold {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+@keyframes levelup-pulse {
+  from { transform: scale(0.98); box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+  to { transform: scale(1.02); box-shadow: 0 0 35px rgba(255, 215, 0, 0.9); }
+}
+
+.hidden {
+  display: none !important;
+}
