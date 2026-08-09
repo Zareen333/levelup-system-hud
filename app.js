@@ -32,6 +32,14 @@ class LevelUpApp {
     this.facingMode = "environment"; // 'environment' (rear) or 'user' (front)
     this.cameraStream = null;
 
+    // AI Vision Pose & Activity Recognition State
+    this.isAIVisionActive = false;
+    this.poseEngine = null;
+    this.cameraUtils = null;
+    this.pushupReps = 0;
+    this.pushupState = "UP"; // 'UP' or 'DOWN'
+    this.targetReps = 5;
+
     this.init();
   }
 
@@ -89,6 +97,7 @@ class LevelUpApp {
     document.getElementById("btn-mic-toggle").addEventListener("click", () => this.toggleSpeechRecognition());
     document.getElementById("btn-ar-camera").addEventListener("click", () => this.toggleARCamera());
     document.getElementById("btn-flip-cam").addEventListener("click", () => this.flipCameraSource());
+    document.getElementById("btn-ai-vision").addEventListener("click", () => this.toggleAIVision());
 
     // Forms
     document.getElementById("registration-form").addEventListener("submit", (e) => {
@@ -140,8 +149,146 @@ class LevelUpApp {
         this.toggleViewMode();
       } else if (e.key.toLowerCase() === "c") {
         this.toggleARCamera();
+      } else if (e.key.toLowerCase() === "v") {
+        this.toggleAIVision();
       }
     });
+  }
+
+  // AI Vision MediaPipe Computer Vision Detection
+  async toggleAIVision() {
+    const btnAi = document.getElementById("btn-ai-vision");
+    const txtAi = document.getElementById("ai-btn-text");
+    const repBadge = document.getElementById("ai-rep-badge");
+
+    if (this.isAIVisionActive) {
+      this.isAIVisionActive = false;
+      btnAi.classList.remove("active");
+      txtAi.innerText = "AI AUTO-DETECT";
+      repBadge.classList.add("hidden");
+      this.setFeedback("AI Vision Auto-Detect disabled.");
+      this.speakAsync("AI Vision Computer Vision scanner offline.");
+    } else {
+      if (!window.Pose) {
+        alert("MediaPipe Pose library is loading. Please check your internet connection.");
+        return;
+      }
+
+      // Ensure Camera is active first
+      if (!this.isARActive) {
+        await this.toggleARCamera();
+      }
+
+      this.isAIVisionActive = true;
+      btnAi.classList.add("active");
+      txtAi.innerText = "AI ACTIVE 🤖";
+      repBadge.classList.remove("hidden");
+      this.pushupReps = 0;
+      this.pushupState = "UP";
+      document.getElementById("ai-rep-count").innerText = "0";
+
+      this.initMediaPipePose();
+      this.setFeedback("AI Vision initialized! Perform pushups in front of camera to auto-complete quest.");
+      this.speakAsync("AI Vision Auto Detection online. Body landmark tracking active.");
+    }
+  }
+
+  initMediaPipePose() {
+    if (this.poseEngine) return;
+
+    try {
+      this.poseEngine = new window.Pose({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+      });
+
+      this.poseEngine.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+
+      this.poseEngine.onResults((results) => this.onPoseResults(results));
+      this.startAIVisionFrameLoop();
+    } catch (err) {
+      console.warn("MediaPipe Pose Init Error:", err);
+    }
+  }
+
+  startAIVisionFrameLoop() {
+    const videoEl = document.getElementById("ar-camera-feed");
+    const processFrame = async () => {
+      if (this.isAIVisionActive && videoEl && videoEl.readyState >= 2 && this.poseEngine) {
+        try {
+          await this.poseEngine.send({ image: videoEl });
+        } catch (e) {
+          console.warn("Pose frame error:", e);
+        }
+      }
+      if (this.isAIVisionActive) {
+        requestAnimationFrame(processFrame);
+      }
+    };
+    requestAnimationFrame(processFrame);
+  }
+
+  onPoseResults(results) {
+    if (!this.isAIVisionActive || !results.poseLandmarks) return;
+
+    const landmarks = results.poseLandmarks;
+    // Landmark IDs: Left Shoulder 11, Left Elbow 13, Left Wrist 15
+    const shoulder = landmarks[11];
+    const elbow = landmarks[13];
+    const wrist = landmarks[15];
+
+    if (shoulder && elbow && wrist && shoulder.visibility > 0.4 && elbow.visibility > 0.4) {
+      const angle = this.calculateAngle(shoulder, elbow, wrist);
+
+      // Pushup Rep State Machine
+      if (angle > 150) {
+        this.pushupState = "UP";
+      } else if (angle < 90 && this.pushupState === "UP") {
+        this.pushupState = "DOWN";
+      } else if (angle > 140 && this.pushupState === "DOWN") {
+        this.pushupState = "UP";
+        this.pushupReps += 1;
+        document.getElementById("ai-rep-count").innerText = this.pushupReps;
+        this.setFeedback(`🤖 [AI VISION DETECTED]: Pushup Rep #${this.pushupReps} Verified!`);
+
+        // Check Target Completion Threshold
+        if (this.pushupReps >= this.targetReps) {
+          this.autoCompleteAIVisionQuest("pushup");
+        }
+      }
+    }
+  }
+
+  calculateAngle(a, b, c) {
+    const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+    let angle = Math.abs((radians * 180.0) / Math.PI);
+    if (angle > 180.0) {
+      angle = 360.0 - angle;
+    }
+    return angle;
+  }
+
+  autoCompleteAIVisionQuest(keyword) {
+    const q = this.quests.find(item => !item.isCompleted && (item.title.toLowerCase().includes(keyword) || item.category.toLowerCase().includes(keyword)));
+    if (q) {
+      const idx = this.quests.indexOf(q);
+      q.isCompleted = true;
+      const leveledUp = this.gainXP(q.xp);
+      this.saveStorage();
+
+      this.speakAsync(`AI Vision confirmation: Quest '${q.title}' detected and verified. Granting ${q.xp} experience points.`);
+      this.setFeedback(`🤖 [AI VISION VERIFIED]: Quest '${q.title}' completed automatically (+${q.xp} XP)!`);
+
+      if (leveledUp) {
+        this.showLevelUpModal();
+      }
+      this.render();
+    }
   }
 
   // Live AR Camera Stream Mode
@@ -154,7 +301,6 @@ class LevelUpApp {
     const txtAr = document.getElementById("ar-btn-text");
 
     if (this.isARActive) {
-      // Stop Camera
       this.stopCameraStream();
       this.isARActive = false;
 
@@ -167,7 +313,6 @@ class LevelUpApp {
       this.setFeedback("AR Camera Mode disabled.");
       this.speakAsync("AR Glass camera stream closed.");
     } else {
-      // Start Camera
       try {
         await this.startCameraStream(this.facingMode);
         this.isARActive = true;
@@ -193,8 +338,8 @@ class LevelUpApp {
     const constraints = {
       video: {
         facingMode: facing,
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
       },
       audio: false
     };
@@ -324,6 +469,11 @@ class LevelUpApp {
 
     if (phrase.includes("level up") || phrase.includes("upgrade level")) {
       this.triggerLevelUp();
+      return;
+    }
+
+    if (phrase.includes("ai vision") || phrase.includes("auto detect")) {
+      this.toggleAIVision();
       return;
     }
 
@@ -467,6 +617,8 @@ class LevelUpApp {
       }
     } else if (action === "levelup" || action === "level") {
       this.triggerLevelUp();
+    } else if (action === "ai" || action === "vision") {
+      this.toggleAIVision();
     } else if (action === "camera" || action === "ar") {
       this.toggleARCamera();
     } else if (action === "mode" || action === "toggle" || action === "mobile" || action === "desktop") {

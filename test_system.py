@@ -60,6 +60,16 @@ class TestVoiceIntentParsing(unittest.TestCase):
     def tearDown(self) -> None:
         self.listener.stop()
 
+    def test_ai_vision_angle_calculation(self):
+        from system_ai_vision import AIVisionDetector
+        detector = AIVisionDetector()
+        # Straight arm (180 deg)
+        angle_straight = detector._calculate_angle([0, 0], [1, 0], [2, 0])
+        self.assertAlmostEqual(angle_straight, 180.0, delta=1.0)
+        # Right angle arm (90 deg)
+        angle_bent = detector._calculate_angle([0, 1], [0, 0], [1, 0])
+        self.assertAlmostEqual(angle_bent, 90.0, delta=1.0)
+
     def test_intent_level_up(self) -> None:
         res = self.listener.parse_intent("System level up please")
         self.assertEqual(res, ("levelup", None))
