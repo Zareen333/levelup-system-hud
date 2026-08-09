@@ -36,6 +36,37 @@ body {
   position: relative;
 }
 
+/* Live AR Video Stream Background */
+.ar-video-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -2;
+}
+
+/* AR Glass Scanlines & Lens Vignette Layer */
+.ar-scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 229, 255, 0.04),
+    rgba(0, 229, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
+  animation: scanline-flicker 4s infinite linear;
+}
+
 /* Subtle Cyber Grid Background */
 .bg-grid {
   position: fixed;
@@ -168,6 +199,24 @@ body.mobile-view .hud-container {
   background: var(--gold);
   color: var(--bg-dark);
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.btn-ar {
+  border-color: var(--cyan);
+  background: rgba(0, 229, 255, 0.25);
+  color: var(--white);
+}
+.btn-ar.active {
+  background: var(--cyan);
+  color: var(--bg-dark);
+  box-shadow: 0 0 12px var(--cyan);
+  animation: pulse-ar 1.5s infinite alternate;
+}
+
+.btn-flip {
+  border-color: var(--light-cyan);
+  background: rgba(0, 85, 255, 0.4);
+  color: var(--white);
 }
 
 .btn-add {
@@ -587,6 +636,11 @@ body.mobile-view .hud-container {
 @keyframes pulse-gold {
   from { opacity: 0.7; }
   to { opacity: 1; }
+}
+
+@keyframes pulse-ar {
+  from { box-shadow: 0 0 8px var(--cyan); }
+  to { box-shadow: 0 0 18px var(--cyan); }
 }
 
 @keyframes levelup-pulse {

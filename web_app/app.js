@@ -27,6 +27,11 @@ class LevelUpApp {
     this.recognition = null;
     this.isListening = false;
 
+    // AR Camera Mode State
+    this.isARActive = false;
+    this.facingMode = "environment"; // 'environment' (rear) or 'user' (front)
+    this.cameraStream = null;
+
     this.init();
   }
 
@@ -82,6 +87,8 @@ class LevelUpApp {
     document.getElementById("btn-add-quest").addEventListener("click", () => this.openAddQuestModal());
     document.getElementById("btn-cancel-quest").addEventListener("click", () => this.closeAddQuestModal());
     document.getElementById("btn-mic-toggle").addEventListener("click", () => this.toggleSpeechRecognition());
+    document.getElementById("btn-ar-camera").addEventListener("click", () => this.toggleARCamera());
+    document.getElementById("btn-flip-cam").addEventListener("click", () => this.flipCameraSource());
 
     // Forms
     document.getElementById("registration-form").addEventListener("submit", (e) => {
@@ -121,7 +128,7 @@ class LevelUpApp {
     window.addEventListener("keydown", (e) => {
       const activeEl = document.activeElement;
       if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) {
-        return; // Don't interrupt typing
+        return;
       }
 
       if (e.key >= "1" && e.key <= "9") {
@@ -131,8 +138,89 @@ class LevelUpApp {
         this.triggerLevelUp();
       } else if (e.key.toLowerCase() === "m") {
         this.toggleViewMode();
+      } else if (e.key.toLowerCase() === "c") {
+        this.toggleARCamera();
       }
     });
+  }
+
+  // Live AR Camera Stream Mode
+  async toggleARCamera() {
+    const videoEl = document.getElementById("ar-camera-feed");
+    const scanlinesEl = document.getElementById("ar-scanlines");
+    const bgGridEl = document.getElementById("bg-grid");
+    const btnAr = document.getElementById("btn-ar-camera");
+    const btnFlip = document.getElementById("btn-flip-cam");
+    const txtAr = document.getElementById("ar-btn-text");
+
+    if (this.isARActive) {
+      // Stop Camera
+      this.stopCameraStream();
+      this.isARActive = false;
+
+      videoEl.classList.add("hidden");
+      scanlinesEl.classList.add("hidden");
+      bgGridEl.classList.remove("hidden");
+      btnFlip.classList.add("hidden");
+      btnAr.classList.remove("active");
+      txtAr.innerText = "AR CAMERA";
+      this.setFeedback("AR Camera Mode disabled.");
+      this.speakAsync("AR Glass camera stream closed.");
+    } else {
+      // Start Camera
+      try {
+        await this.startCameraStream(this.facingMode);
+        this.isARActive = true;
+
+        videoEl.classList.remove("hidden");
+        scanlinesEl.classList.remove("hidden");
+        bgGridEl.classList.add("hidden");
+        btnFlip.classList.remove("hidden");
+        btnAr.classList.add("active");
+        txtAr.innerText = "AR ON 👓";
+        this.setFeedback("AR Glasses Mode active! Live camera feed overlay online.");
+        this.speakAsync("AR Glasses Mode initialized. Live video feed active.");
+      } catch (err) {
+        console.warn("AR Camera Error:", err);
+        alert("Could not access camera. Please allow camera permissions in your browser.");
+        this.setFeedback("Camera access denied or device unavailable.", true);
+      }
+    }
+  }
+
+  async startCameraStream(facing) {
+    this.stopCameraStream();
+    const constraints = {
+      video: {
+        facingMode: facing,
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
+      audio: false
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    const videoEl = document.getElementById("ar-camera-feed");
+    videoEl.srcObject = stream;
+    this.cameraStream = stream;
+  }
+
+  stopCameraStream() {
+    if (this.cameraStream) {
+      this.cameraStream.getTracks().forEach(track => track.stop());
+      this.cameraStream = null;
+    }
+  }
+
+  async flipCameraSource() {
+    if (!this.isARActive) return;
+    this.facingMode = this.facingMode === "environment" ? "user" : "environment";
+    try {
+      await this.startCameraStream(this.facingMode);
+      this.setFeedback(`Switched camera to ${this.facingMode === "environment" ? "Rear / Environment" : "Front / Selfie"}.`);
+    } catch (err) {
+      console.warn("Flip Camera Error:", err);
+    }
   }
 
   // Voice Output (TTS)
@@ -236,6 +324,11 @@ class LevelUpApp {
 
     if (phrase.includes("level up") || phrase.includes("upgrade level")) {
       this.triggerLevelUp();
+      return;
+    }
+
+    if (phrase.includes("camera") || phrase.includes("ar mode")) {
+      this.toggleARCamera();
       return;
     }
 
@@ -374,6 +467,8 @@ class LevelUpApp {
       }
     } else if (action === "levelup" || action === "level") {
       this.triggerLevelUp();
+    } else if (action === "camera" || action === "ar") {
+      this.toggleARCamera();
     } else if (action === "mode" || action === "toggle" || action === "mobile" || action === "desktop") {
       this.toggleViewMode();
     } else if (action === "addquest" && param) {

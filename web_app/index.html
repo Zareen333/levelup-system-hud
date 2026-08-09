@@ -13,8 +13,14 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="desktop-view">
+  <!-- Live AR Camera Feed Background -->
+  <video id="ar-camera-feed" class="ar-video-bg hidden" autoplay playsinline muted></video>
+
+  <!-- AR Glass Scanlines & Lens Layer -->
+  <div id="ar-scanlines" class="ar-scanlines hidden"></div>
+
   <!-- Subtle Cyber Grid Background -->
-  <div class="bg-grid"></div>
+  <div id="bg-grid" class="bg-grid"></div>
 
   <!-- Main Container -->
   <main id="app-container" class="hud-container">
@@ -26,6 +32,12 @@
           <span id="level-badge" class="level-badge">LVL 1</span>
         </div>
         <div class="header-actions">
+          <button id="btn-ar-camera" class="btn-pill btn-ar" title="Toggle Live AR Camera Mode">
+            <span class="ar-icon">👓</span> <span id="ar-btn-text">AR CAMERA</span>
+          </button>
+          <button id="btn-flip-cam" class="btn-pill btn-flip hidden" title="Flip Camera Source">
+            🔄 FLIP CAM
+          </button>
           <button id="btn-mic-toggle" class="btn-pill btn-mic" title="Toggle Voice Recognition">
             <span class="mic-icon">🎤</span> <span id="mic-status-text">VOICE: OFF</span>
           </button>
